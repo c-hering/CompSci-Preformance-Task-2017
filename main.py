@@ -1,4 +1,4 @@
-import os, sys, glob
+import os, sys, glob, time
 
 exit = False
 
@@ -27,26 +27,29 @@ def scan_file(raw):
     if "scan" in fl:
         file_name = raw.split(" ", 2)
         fl = file_name[2]
-    f = open(fl, "r")
-    x = 1
-    while f.readline(x):
-        print f.readline(x)
-        if check_line(f.readline(x)):
-            mal = True
-        x = x+1
-    if mal:
-        print "malicious code detected in file " + f.name
-        delete = raw_input("would you like to delete this file? (y/n)").lower()
-        if "y" in delete:
-            try:
-                f.close()
-                os.remove(fl)
-            except Exception:
-                print("oops, looks like that file is being used somewhere else")
-    else:
-        print "no malicious code detected in file " + f.name
-        f.close()
-        
+    try:
+        f = open(fl, "r")
+        x = 1
+        while f.readline(x):
+            #print f.readline(x)
+            if check_line(f.readline(x)):
+                mal = True
+            x = x+1
+        if mal:
+            print "malicious code detected in file " + f.name
+            delete = raw_input("would you like to delete this file? (y/n)").lower()
+            if "y" in delete:
+                try:
+                    f.close()
+                    os.remove(fl)
+                except Exception:
+                    print("oops, looks like that file is being used somewhere else")
+        else:
+            print "no malicious code detected in file " + f.name
+            f.close()
+    except Exception:
+        print("oops, looks like there is no files named '" + fl + "' in this directory")
+
 def scan_folder(raw):
     folder_name = raw.split(" ", 2)
     os.chdir(folder_name[2])
@@ -60,7 +63,12 @@ def parse_input(input):
         else:
             parse_os_cmd(input)
     elif "exit" in input:
-        print("^C to Confirm Exit")
+        for x in range(0,15):
+            exit_string = "\r" + "Exiting Program" + "." * (x%4) + " " * x
+            print exit_string,
+            time.sleep(.3)
+        sys.exit()
+
     elif "scan" in  input:
         if input == "scan -f" or input == "scan -s" or input == "scan":
             print("Wrong Syntax, type 'help' for help")
